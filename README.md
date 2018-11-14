@@ -1,0 +1,1 @@
+# lite function test
