@@ -9,8 +9,6 @@ public struct Shatter
     public Transform transform;
     public Rigidbody rigidbody;
     public Tween boomTween;
-    public Tween fixTweenPos;
-    public Tweener fixTweenRot;
     public Vector3 initialPos;
     public Vector3 initialRot;
 }
@@ -159,9 +157,9 @@ public class Boom : MonoBehaviour
     
     void Start()
     {
-        List<Transform> childsList = new List<Transform>();
         
         #region 老方法
+        //List<Transform> childsList = new List<Transform>();
         //GetChildTransform(ref childsList, transform);
         //childs = childsList.ToArray();
 
@@ -188,9 +186,10 @@ public class Boom : MonoBehaviour
         Transform []childsTransform = transform.GetComponentsInChildren<Transform>();
         foreach (Transform t in childsTransform)
         {
-            ///如果这个物体时可见的，
+            ///如果这个物体是可见的，
             ///只处理可见的物体，空物体就不用boom了
-            if (t .GetComponent<MeshRenderer>())
+            ///由于动画师在local坐标变换的，所以剔除掉空物体，可能会对层级结构产生不可预料的影响。所以就不管了，只要是子物体就给他做动画
+            if (true)//t .GetComponent<MeshRenderer>())
             {
                 if (!t .gameObject .GetComponent <Collider >())
                     t.gameObject.AddComponent<BoxCollider>();
