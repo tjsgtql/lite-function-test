@@ -17,7 +17,7 @@ public struct Shatter
 public class Boom : MonoBehaviour
 {
     [SerializeField] Ease ease = Ease.Linear;
-    [SerializeField] float fixTime = 1;
+    [SerializeField] float animationLength = 1;
 
     List<Shatter> shatters = new List<Shatter>();
 
@@ -57,22 +57,23 @@ public class Boom : MonoBehaviour
         #endregion
 
         #region 新方法
-        for (int i=0;i <shatters .Count;i++)
-        {
-            Shatter shatter = shatters[i];
-            if (shatter .boomTween !=null)
-            {
-                shatter.boomTween.Restart();
-            }else
-            {
-                Vector3 mov = shatter.initialPos * 3;
-                shatter.boomTween = shatter.transform.DOLocalMove(mov, 1)
-                    .SetAutoKill(false)
-                    .SetEase(ease);
-            }
-            //因为shatter是struct,所以最后要写回去
-            shatters[i] = shatter;
-        }
+        // for (int i=0;i <shatters .Count;i++)
+        // {
+        //     Shatter shatter = shatters[i];
+        //     if (shatter .boomTween !=null)
+        //     {
+        //         shatter.boomTween.Restart();
+        //     }else
+        //     {
+        //         Vector3 mov = shatter.initialPos * 3;
+        //         shatter.boomTween = shatter.transform.DOLocalMove(mov, animationLength)
+        //             .SetAutoKill(false)
+        //             .SetEase(ease);
+        //     }
+        //     //因为shatter是struct,所以最后要写回去
+        //     shatters[i] = shatter;
+        // }
+        GetComponent <BoomWithAnimation >().BoomAnimator ();
         Invoke("UseGravity", 3);
         #endregion
     }
@@ -143,9 +144,9 @@ public class Boom : MonoBehaviour
             ///因为boom后启动了物理效果，每次位置都不一样，所以fixTweenPos和fixTweenPos每次都需要重新设置路径
             ///不知道这样还有没有保存tween变量的意义 >>> 测完了，没意义。每次fixTweenPos = shatter.transform.DOLocalMove操作之后都会生成新的tween。对于这种还是执行完了自动销毁的好
             Shatter shatter = shatters[i];
-            Tween tweenPos = shatter.transform.DOLocalMove(shatter.initialPos, 1)
+            Tween tweenPos = shatter.transform.DOLocalMove(shatter.initialPos, animationLength)
                 .SetEase(ease);
-            Tween tweenRot = shatter.transform.DOLocalRotate(shatter.initialRot, 1)
+            Tween tweenRot = shatter.transform.DOLocalRotate(shatter.initialRot, animationLength)
                 .SetEase(ease);
             //关闭物理效果
             shatter.rigidbody.useGravity = false;
@@ -192,7 +193,9 @@ public class Boom : MonoBehaviour
             if (true)//t .GetComponent<MeshRenderer>())
             {
                 if (!t .gameObject .GetComponent <Collider >())
-                    t.gameObject.AddComponent<BoxCollider>();
+                {
+                    t.gameObject.AddComponent<BoxCollider>();//.material=physicMaterial;
+                }
 
                 Shatter shatter = new Shatter();
                 shatter.transform = t;
