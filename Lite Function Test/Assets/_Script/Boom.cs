@@ -27,7 +27,9 @@ public class Boom : MonoBehaviour
     Rigidbody[] rigidbodys;
     Tween[] tweens;
 
-    bool boom = true;
+    bool boom = false;
+    float fixTime=1;
+    
 
     void GetChildTransform(ref List <Transform> childsList,Transform parent)
     {
@@ -46,14 +48,14 @@ public class Boom : MonoBehaviour
     {
         #region 老方法
         //StartCoroutine(DoBoooom());
-        //for (int i = 0; i < childs.Length; i++)
-        //{
-        //    Vector3[] wayPoints = new Vector3[2] { childs[i].localPosition, initialPos[i] * 3 };
-        //    childs[i].DOLocalPath(wayPoints, fixTime)
-        //        .SetOptions(false)
-        //        .SetEase(ease);
-        //}
-        //Invoke("UseGravity", 3);
+        for (int i = 0; i < childs.Length; i++)
+        {
+           Vector3[] wayPoints = new Vector3[2] { childs[i].localPosition, initialPos[i] * 3 };
+           childs[i].DOLocalPath(wayPoints, fixTime)
+               .SetOptions(false)
+               .SetEase(ease);
+        }
+        Invoke("UseGravity", 3);
         #endregion
 
         #region 新方法
@@ -73,8 +75,9 @@ public class Boom : MonoBehaviour
         //     //因为shatter是struct,所以最后要写回去
         //     shatters[i] = shatter;
         // }
-        GetComponent <BoomWithAnimation >().BoomAnimator ();
-        Invoke("UseGravity", 3);
+
+        // GetComponent <BoomWithAnimation >().BoomAnimator ();
+        // Invoke("UseGravity", 3);
         #endregion
     }
     IEnumerator DoBoooom()
@@ -103,120 +106,133 @@ public class Boom : MonoBehaviour
     void UseGravity()
     {
         #region 旧方法
-        //foreach (Rigidbody r in rigidbodys)
-        //{
-        //    r.useGravity = true;
-        //    r.isKinematic = false;
-        //}
-        #endregion
-
-        #region 新方法
-        var s = shatters.GetEnumerator();
-        while (s .MoveNext())
+        foreach (Rigidbody r in rigidbodys)
         {
-            s.Current.rigidbody.useGravity = true;
-            s.Current.rigidbody.isKinematic = false;
+           r.useGravity = true;
+           r.isKinematic = false;
         }
         #endregion
 
-        Invoke("Fix", 3);
+        #region 新方法
+        // var s = shatters.GetEnumerator();
+        // while (s .MoveNext())
+        // {
+        //     s.Current.rigidbody.useGravity = true;
+        //     s.Current.rigidbody.isKinematic = false;
+        // }
+        #endregion
+
+        //Invoke("Fix", 3);
     }
 
     void Fix()
     {
         #region 旧方法
-        //for (int i=0;i <childs .Length;i++)
-        //{
-        //    rigidbodys[i].useGravity = false;
-        //    rigidbodys[i].isKinematic = true;
+        for (int i=0;i <childs .Length;i++)
+        {
+           rigidbodys[i].useGravity = false;
+           rigidbodys[i].isKinematic = true;
 
-        //    Vector3[] wayPoints = new Vector3[2] { childs[i].localPosition, initialPos[i] };
-        //    childs[i].DOLocalPath(wayPoints, fixTime)
-        //        .SetOptions(false)
-        //        .SetEase(ease);
-        //    childs[i].DOLocalRotate(initialRot[i], fixTime)
-        //        .SetEase(ease);
-        //}
+           Vector3[] wayPoints = new Vector3[2] { childs[i].localPosition, initialPos[i] };
+           childs[i].DOLocalPath(wayPoints, fixTime)
+               .SetOptions(false)
+               .SetEase(ease);
+           childs[i].DOLocalRotate(initialRot[i], fixTime)
+               .SetEase(ease);
+        }
         #endregion
         
-        for (int i=0;i <shatters .Count;i++)
-        {
-            ///因为boom后启动了物理效果，每次位置都不一样，所以fixTweenPos和fixTweenPos每次都需要重新设置路径
-            ///不知道这样还有没有保存tween变量的意义 >>> 测完了，没意义。每次fixTweenPos = shatter.transform.DOLocalMove操作之后都会生成新的tween。对于这种还是执行完了自动销毁的好
-            Shatter shatter = shatters[i];
-            Tween tweenPos = shatter.transform.DOLocalMove(shatter.initialPos, animationLength)
-                .SetEase(ease);
-            Tween tweenRot = shatter.transform.DOLocalRotate(shatter.initialRot, animationLength)
-                .SetEase(ease);
-            //关闭物理效果
-            shatter.rigidbody.useGravity = false;
-            shatter.rigidbody.isKinematic = true;
+        // for (int i=0;i <shatters .Count;i++)
+        // {
+        //     ///因为boom后启动了物理效果，每次位置都不一样，所以fixTweenPos和fixTweenPos每次都需要重新设置路径
+        //     ///不知道这样还有没有保存tween变量的意义 >>> 测完了，没意义。每次fixTweenPos = shatter.transform.DOLocalMove操作之后都会生成新的tween。对于这种还是执行完了自动销毁的好
+        //     Shatter shatter = shatters[i];
+        //     Tween tweenPos = shatter.transform.DOLocalMove(shatter.initialPos, animationLength)
+        //         .SetEase(ease);
+        //     Tween tweenRot = shatter.transform.DOLocalRotate(shatter.initialRot, animationLength)
+        //         .SetEase(ease);
+        //     //关闭物理效果
+        //     shatter.rigidbody.useGravity = false;
+        //     shatter.rigidbody.isKinematic = true;
 
-            shatters[i] = shatter;
-        }
+        //     shatters[i] = shatter;
+        // }
     }
     
     void Start()
     {
         
         #region 老方法
-        //List<Transform> childsList = new List<Transform>();
-        //GetChildTransform(ref childsList, transform);
-        //childs = childsList.ToArray();
+        List<Transform> childsList = new List<Transform>();
+        GetChildTransform(ref childsList, transform);
+        childs = childsList.ToArray();
 
-        //initialPos = new Vector3[childs.Length];
-        //initialRot = new Vector3[childs.Length];
-        //rigidbodys = new Rigidbody[childs.Length];
+        initialPos = new Vector3[childs.Length];
+        initialRot = new Vector3[childs.Length];
+        rigidbodys = new Rigidbody[childs.Length];
 
-        //for (int i = 0; i < childs.Length; i++)
-        //{
-        //    initialPos[i] = childs[i].localPosition;
-        //    initialRot[i] = childs[i].localEulerAngles;
-        //    Rigidbody r = childs[i].gameObject.GetComponent<Rigidbody>();
-        //    if (r == null)
-        //        r = childs[i].gameObject.AddComponent<Rigidbody>();
-        //    rigidbodys[i] = r;
-        //    r.useGravity = false;
-        //    r.isKinematic = true;
-        //    r.gameObject.AddComponent<BoxCollider>();
-        //}
+        for (int i = 0; i < childs.Length; i++)
+        {
+           initialPos[i] = childs[i].localPosition;
+           initialRot[i] = childs[i].localEulerAngles;
+           Rigidbody r = childs[i].gameObject.GetComponent<Rigidbody>();
+           if (r == null)
+               r = childs[i].gameObject.AddComponent<Rigidbody>();
+           rigidbodys[i] = r;
+           r.useGravity = false;
+           r.isKinematic = true;
+           r.gameObject.AddComponent<BoxCollider>();
+        }
         #endregion
 
 
         #region 新方法
-        Transform []childsTransform = transform.GetComponentsInChildren<Transform>();
-        foreach (Transform t in childsTransform)
-        {
-            ///如果这个物体是可见的，
-            ///只处理可见的物体，空物体就不用boom了
-            ///由于动画师在local坐标变换的，所以剔除掉空物体，可能会对层级结构产生不可预料的影响。所以就不管了，只要是子物体就给他做动画
-            if (true)//t .GetComponent<MeshRenderer>())
-            {
-                if (!t .gameObject .GetComponent <Collider >())
-                {
-                    t.gameObject.AddComponent<BoxCollider>();//.material=physicMaterial;
-                }
+        // Transform []childsTransform = transform.GetComponentsInChildren<Transform>();
+        // foreach (Transform t in childsTransform)
+        // {
+        //     ///如果这个物体是可见的，
+        //     ///只处理可见的物体，空物体就不用boom了
+        //     ///由于动画师在local坐标变换的，所以剔除掉空物体，可能会对层级结构产生不可预料的影响。所以就不管了，只要是子物体就给他做动画
+        //     if (true)//t .GetComponent<MeshRenderer>())
+        //     {
+        //         if (!t .gameObject .GetComponent <Collider >())
+        //         {
+        //             t.gameObject.AddComponent<BoxCollider>();//.material=physicMaterial;
+        //         }
 
-                Shatter shatter = new Shatter();
-                shatter.transform = t;
-                shatter.rigidbody = t.gameObject.GetComponent<Rigidbody>() ? t.gameObject.GetComponent<Rigidbody>() : t.gameObject.AddComponent<Rigidbody>();
-                shatter.rigidbody.useGravity = false;
-                shatter.rigidbody.isKinematic = true;
-                shatter.initialPos = t.localPosition;
-                shatter.initialRot = t.localEulerAngles;
+        //         Shatter shatter = new Shatter();
+        //         shatter.transform = t;
+        //         shatter.rigidbody = t.gameObject.GetComponent<Rigidbody>() ? t.gameObject.GetComponent<Rigidbody>() : t.gameObject.AddComponent<Rigidbody>();
+        //         shatter.rigidbody.useGravity = false;
+        //         shatter.rigidbody.isKinematic = true;
+        //         shatter.initialPos = t.localPosition;
+        //         shatter.initialRot = t.localEulerAngles;
 
-                shatters.Add(shatter);
-            }
-        }
+        //         shatters.Add(shatter);
+        //     }
+        // }
         #endregion
     }
 
     private void Update()
     {
-        if (Input .GetKeyDown (KeyCode .Space))
+        if (Input.GetKeyUp(KeyCode.Alpha1))
         {
             DoBoom();
-            boom = !boom;
+            boom = true ;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Alpha2) && boom)
+        {
+            Debug.Log(2);
+            UseGravity();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Alpha3) && boom)
+        {
+            Debug.Log(3);
+            Fix();
+            boom = false;
         }
     }
 

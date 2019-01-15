@@ -12,6 +12,7 @@ public class BoomWithAnimation : MonoBehaviour
 		animation =GetComponent <Animation>();
 		childs =transform .GetComponentsInChildren <Transform >();
 
+		//BoomAnimator();
     }
 
 	public void BoomAnimator(){
